@@ -14,7 +14,7 @@ public class DbUtils {
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/app",
-                "app",
+                "user",
                 "pass"
         );
     }
@@ -27,19 +27,10 @@ public class DbUtils {
                         "JOIN users u ON ac.user_id = u.id " +
                         "WHERE u.login = ? " +
                         "ORDER BY ac.created DESC " +
-                        "LIMIT 1;";
+                        "LIMIT 1";
 
         try (Connection conn = getConnection()) {
             return runner.query(conn, sql, new ScalarHandler<>(), login);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void clearAuthCodes() {
-
-        try (Connection conn = getConnection()) {
-            runner.update(conn, "DELETE FROM auth_codes;");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
