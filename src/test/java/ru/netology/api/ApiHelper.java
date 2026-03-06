@@ -5,6 +5,8 @@ import io.restassured.http.ContentType;
 import ru.netology.data.DataHelper;
 import ru.netology.db.DbUtils;
 
+import java.util.List;
+
 import static io.restassured.RestAssured.given;
 
 public class ApiHelper {
@@ -26,7 +28,10 @@ public class ApiHelper {
                 .then()
                 .statusCode(200);
 
-        String code = DbUtils.getAuthCode(authInfo.getLogin());
+        String code;
+        do {
+            code = DbUtils.getAuthCode(authInfo.getLogin());
+        } while (code == null);
 
         return given()
                 .contentType(ContentType.JSON)
@@ -40,14 +45,21 @@ public class ApiHelper {
 
     public static int getCardBalance(String token, String cardNumber) {
 
-        return given()
-                .header("Authorization", "Bearer " + token)
-                .get("/api/cards")
-                .then()
-                .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getInt("find { it.number == '" + cardNumber + "' }.balance");
+        List<CardInfo> cards =
+                given()
+                        .header("Authorization", "Bearer " + token)
+                        .get("/api/cards")
+                        .then()
+                        .statusCode(200)
+                        .extract()
+                        .jsonPath()
+                        .getList("", CardInfo.class);
+
+        return cards.stream()
+                .filter(card -> card.getNumber().equals(cardNumber))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Card not found"))
+                .getBalance_in_kopecks();
     }
 
     public static void transfer(String token, String from, String to, int amount) {

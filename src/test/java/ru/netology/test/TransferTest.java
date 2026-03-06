@@ -11,34 +11,23 @@ public class TransferTest {
     @Test
     void shouldTransferMoneyBetweenCards() {
 
-        var authInfo = DataHelper.getAuthInfo();
-        var firstCard = DataHelper.getFirstCard();
-        var secondCard = DataHelper.getSecondCard();
+        var auth = DataHelper.getAuthInfo();
+        var card1 = DataHelper.getFirstCard();
+        var card2 = DataHelper.getSecondCard();
 
-        String token = ApiHelper.loginAndGetToken(authInfo);
+        String token = ApiHelper.loginAndGetToken(auth);
 
-        int balanceFirstBefore =
-                ApiHelper.getCardBalance(token, firstCard.getNumber());
+        int balance1 = ApiHelper.getCardBalance(token, card1.getNumber());
+        int balance2 = ApiHelper.getCardBalance(token, card2.getNumber());
 
-        int balanceSecondBefore =
-                ApiHelper.getCardBalance(token, secondCard.getNumber());
+        int amount = 5000;
 
-        int amount = DataHelper.getTransferAmount(balanceFirstBefore);
+        ApiHelper.transfer(token, card1.getNumber(), card2.getNumber(), amount);
 
-        ApiHelper.transfer(
-                token,
-                firstCard.getNumber(),
-                secondCard.getNumber(),
-                amount
-        );
+        int balance1after = ApiHelper.getCardBalance(token, card1.getNumber());
+        int balance2after = ApiHelper.getCardBalance(token, card2.getNumber());
 
-        int balanceFirstAfter =
-                ApiHelper.getCardBalance(token, firstCard.getNumber());
-
-        int balanceSecondAfter =
-                ApiHelper.getCardBalance(token, secondCard.getNumber());
-
-        assertEquals(balanceFirstBefore - amount, balanceFirstAfter);
-        assertEquals(balanceSecondBefore + amount, balanceSecondAfter);
+        assertEquals(balance1 - amount, balance1after);
+        assertEquals(balance2 + amount, balance2after);
     }
 }
