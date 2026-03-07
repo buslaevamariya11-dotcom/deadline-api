@@ -48,16 +48,11 @@ public class TransferTest {
 
         int amount = balanceFirstBefore + 1000;
 
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(new TransferRequest(
-                        firstCard.getNumber(),
-                        secondCard.getNumber(),
-                        amount
-                ))
-                .post("/api/transfer")
-                .then()
-                .statusCode(400);
+        ApiHelper.transferWithError(
+                token,
+                firstCard.getNumber(),
+                secondCard.getNumber(),
+                amount
+        );
     }
 }

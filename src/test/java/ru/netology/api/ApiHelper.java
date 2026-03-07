@@ -73,4 +73,14 @@ public class ApiHelper {
                 .then()
                 .statusCode(200);
     }
+
+    public static void transferWithError(String token, String from, String to, int amount) {
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(new TransferRequest(from, to, amount))
+                .post("/api/transfer")
+                .then()
+                .statusCode(400);
+    }
 }
