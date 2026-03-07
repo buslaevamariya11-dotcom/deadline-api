@@ -16,7 +16,7 @@ public class DataHelper {
     }
 
     public static CardInfo getSecondCard() {
-        return new CardInfo("5559 0000 0000 0008");
+        return new CardInfo("5559 0000 0000 0001");
     }
 
     public static int getTransferAmount(int balance) {

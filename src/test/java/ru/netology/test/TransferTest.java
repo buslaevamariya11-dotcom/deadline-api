@@ -1,9 +1,12 @@
 package ru.netology.test;
 
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import ru.netology.api.ApiHelper;
+import ru.netology.api.TransferRequest;
 import ru.netology.data.DataHelper;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransferTest {
@@ -29,5 +32,32 @@ public class TransferTest {
 
         assertEquals(balance1 - amount, balance1after);
         assertEquals(balance2 + amount, balance2after);
+    }
+
+    @Test
+    void shouldNotTransferMoreThanBalance() {
+
+        var authInfo = DataHelper.getAuthInfo();
+        var firstCard = DataHelper.getFirstCard();
+        var secondCard = DataHelper.getSecondCard();
+
+        String token = ApiHelper.loginAndGetToken(authInfo);
+
+        int balanceFirstBefore =
+                ApiHelper.getCardBalance(token, firstCard.getNumber());
+
+        int amount = balanceFirstBefore + 1000;
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(new TransferRequest(
+                        firstCard.getNumber(),
+                        secondCard.getNumber(),
+                        amount
+                ))
+                .post("/api/transfer")
+                .then()
+                .statusCode(400);
     }
 }

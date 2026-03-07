@@ -44,22 +44,23 @@ public class ApiHelper {
     }
 
     public static int getCardBalance(String token, String cardNumber) {
+        List<CardInfo> cards = given()
+                .header("Authorization", "Bearer " + token)
+                .get("/api/cards")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .jsonPath()
+                .getList(".", CardInfo.class);
 
-        List<CardInfo> cards =
-                given()
-                        .header("Authorization", "Bearer " + token)
-                        .get("/api/cards")
-                        .then()
-                        .statusCode(200)
-                        .extract()
-                        .jsonPath()
-                        .getList("", CardInfo.class);
+        String last4 = cardNumber.substring(cardNumber.length() - 4);
 
         return cards.stream()
-                .filter(card -> card.getNumber().equals(cardNumber))
+                .filter(card -> card.getNumber().endsWith(last4))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Card not found"))
-                .getBalance_in_kopecks();
+                .getBalance();
     }
 
     public static void transfer(String token, String from, String to, int amount) {
